@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Snake</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <script src="render.js"></script><!-- defines canvas, ctx, draw() -->
+  <script src="input.js"></script><!-- attaches keyboard + touch listeners -->
+  <script src="game.js"></script> <!-- state, loop, boot -->
+
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=10.0, user-scalable=yes, viewport-fit=cover">
+    <title>Reza & Unchek | Reza geratis</title>
+
+    <!-- Fonts: Modern + Elegant -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome 6 (Free Icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            touch-action: manipulation;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: #0b0712;
+            color: #f0eff7;
+            transition: background 0.4s ease, color 0.3s ease;
+            overflow-x: hidden;
+            width: 100%;
+            min-height: 100vh;
+            touch-action: pan-x pan-y pinch-zoom;
+        }
+
+        /* Light Theme */
+        body.light {
+            background: #f9f8fe;
+            color: #16112e;
+        }
+
+        /* Variables dinamis dengan nuansa baru */
+        :root {
+            --primary: #c084fc;
+            --primary-dark: #a855f7;
+            --primary-glow: rgba(192, 132, 252, 0.4);
+            --secondary: #fbbf24;
+            --accent: #22d3ee;
+            --glass-bg: rgba(15, 12, 25, 0.65);
+            --glass-border: rgba(192, 132, 252, 0.2);
+            --card-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.4);
+            --text-muted: #a5a1c2;
+            --radius-xl: 28px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
+        }
+
+        body.light {
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(168, 85, 247, 0.25);
+            --card-shadow: 0 20px 35px -12px rgba(0, 0, 0, 0.08);
+            --text-muted: #5e5a7a;
+        }
+
+        /* Animated gradient bg */
+        .gradient-orb {
+            position: fixed;
+            width: 70vw;
+            height: 70vw;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--primary), transparent 70%);
+            filter: blur(100px);
+            opacity: 0.2;
+            pointer-events: none;
+            z-index: 0;
+            animation: floatBg 25s infinite alternate;
+        }
+
+        .orb-1 { top: -20%; left: -20%; background: radial-gradient(circle, #c084fc, transparent); }
+        .orb-2 { bottom: -15%; right: -10%; width: 60vw; height: 60vw; background: radial-gradient(circle, #fbbf24, transparent); animation-duration: 30s; }
+        .orb-3 { top: 40%; left: 30%; width: 50vh; height: 50vh; background: radial-gradient(circle, #22d3ee, transparent); opacity: 0.15; animation-duration: 20s; }
+
+        @keyframes floatBg {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(80px, 60px) scale(1.2); }
+        }
+
+        /* Glassmorphism core */
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--card-shadow);
+        }
+
+        /* navbar fresh */
+        .nav-fresh {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 24px;
+            background: rgba(5, 3, 15, 0.75);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(192, 132, 252, 0.25);
+        }
+
+        body.light .nav-fresh {
+            background: rgba(255, 255, 255, 0.8);
+            border-bottom-color: rgba(168, 85, 247, 0.2);
+        }
+
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, #c084fc, #a855f7);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: white;
+            box-shadow: 0 8px 20px rgba(168, 85, 247, 0.4);
+        }
+
+        .logo-text h1 {
+            font-size: 1.35rem;
+            font-weight: 700;
+            font-family: 'Space Grotesk', monospace;
+            background: linear-gradient(135deg, #fff, #c084fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+        }
+
+        .logo-text p {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            letter-spacing: 0.6px;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .icon-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 40px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: 0.25s;
+            color: #ddd;
+        }
+
+        .icon-btn:hover {
+            background: var(--primary);
+            color: white;
+            transform: scale(0.95);
+            border-color: var(--primary);
+        }
+
+        #logoutBtn {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            padding: 0 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #f87171;
+        }
+
+        #logoutBtn:hover {
+            background: rgba(239, 68, 68, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Login Layout */
+        .login-container {
+            min-height: calc(100vh - 70px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            position: relative;
+            z-index: 2;
+        }
+
+        .login-grid {
+            display: flex;
+            max-width: 1200px;
+            width: 100%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 44px;
+            overflow: hidden;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 25px 45px -12px black;
+        }
+
+        .hero-side {
+            flex: 1;
+            background: linear-gradient(145deg, rgba(192,132,252,0.2), rgba(34,211,238,0.1));
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        .hero-side h2 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+
+        .hero-side h2 span {
+            background: linear-gradient(135deg, #fbbf24, #c084fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .feature-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 0.9rem;
+        }
+
+        .feature i {
+            width: 28px;
+            color: var(--primary);
+        }
+
+        .login-form-side {
+            flex: 1;
+            padding: 2.5rem;
+        }
+
+        @media (max-width: 850px) {
+            .hero-side {
+                display: none;
+            }
+            .login-form-side {
+                width: 100%;
+            }
+            .login-grid {
+                max-width: 480px;
+            }
+        }
+
+        .input-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .input-group label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .input-icon-wrapper {
+            position: relative;
+        }
+
+        .input-icon-wrapper i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .input-icon-wrapper input {
+            width: 100%;
+            padding: 14px 16px 14px 46px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            border-radius: 28px;
+            font-size: 0.9rem;
+            color: inherit;
+            outline: none;
+            transition: all 0.2s;
+        }
+
+        .input-icon-wrapper input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .eye-toggle {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+        }
+
+        .login-btn {
+            width: 100%;
+            background: linear-gradient(95deg, #a855f7, #c084fc);
+            border: none;
+            padding: 14px;
+            border-radius: 40px;
+            font-weight: 700;
+            color: white;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 12px 28px rgba(168,85,247,0.5);
+        }
+
+        .alert-modern {
+            padding: 10px 16px;
+            border-radius: 60px;
+            margin-bottom: 18px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Dashboard */
+        .dash-container {
+            max-width: 1400px;
+            margin: 24px auto;
+            padding: 0 20px 40px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .control-card {
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .input-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            align-items: flex-end;
+        }
+
+        .field-group {
+            flex: 2;
+            min-width: 180px;
+        }
+
+        .field-group label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+        }
+
+        .field-group input {
+            width: 100%;
+            padding: 12px 18px;
+            border-radius: 60px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--glass-border);
+            color: inherit;
+            font-family: monospace;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.05);
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+            color: white;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #059669, #10b981);
+            box-shadow: 0 4px 12px rgba(5,150,105,0.3);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #d97706, #f59e0b);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc2626, #ef4444);
+        }
+
+        .status-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding: 12px 20px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 60px;
+            font-size: 0.8rem;
+        }
+
+        .dot-status {
+            width: 10px;
+            height: 10px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-right: 8px;
+            animation: pulse 1.8s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.4; transform: scale(0.8); }
+            100% { opacity: 1; transform: scale(1.2); }
+        }
+
+        /* Table styling premium */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: 28px;
+            max-height: 55vh;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 16px 12px;
+            background: rgba(168,85,247,0.2);
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--primary);
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.75rem;
+        }
+
+        .badge-modern {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 40px;
+            background: rgba(192,132,252,0.15);
+            font-weight: 600;
+            font-size: 0.7rem;
+        }
+
+        .footer-social {
+            margin-top: 30px;
+            text-align: center;
+            padding: 24px;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .social-card {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 22px;
+            background: rgba(255,255,255,0.04);
+            border-radius: 60px;
+            text-decoration: none;
+            color: inherit;
+            font-weight: 600;
+            transition: 0.2s;
+            border: 1px solid var(--glass-border);
+        }
+
+        .social-card i {
+            font-size: 1.2rem;
+        }
+
+        .social-card:hover {
+            transform: translateY(-4px);
+            background: rgba(192,132,252,0.2);
+        }
+
+        .empty-row {
+            text-align: center;
+            padding: 3rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+
+<div class="gradient-orb orb-1"></div>
+<div class="gradient-orb orb-2"></div>
+<div class="gradient-orb orb-3"></div>
+
+<!-- NAVBAR -->
+<nav class="nav-fresh">
+    <div class="logo-area">
+        <div class="logo-icon"><i class="fas fa-bolt"></i></div>
+        <div class="logo-text">
+            <h1>Reza & Unchek</h1>
+            <p>Reza Jasteb Dan Unchek Premium</p>
+        </div>
+    </div>
+    <div class="nav-actions">
+        <div class="icon-btn" id="colorBtn"><i class="fas fa-palette"></i></div>
+        <div class="icon-btn" id="themeBtn"><i class="fas fa-moon" id="themeIcon"></i></div>
+        <button id="logoutBtn"><i class="fas fa-sign-out-alt"></i> <span>Keluar</span></button>
+    </div>
+</nav>
+
+<!-- LOGIN PAGE -->
+<div id="loginPage" class="login-container">
+    <div class="login-grid">
+        <div class="hero-side">
+            <h2>Generator <span>Premium</span><br>Data Akun Realistis</h2>
+            <div class="feature-list">
+                <div class="feature"><i class="fas fa-database"></i> <span>Data random Nama Indonesia</span></div>
+                <div class="feature"><i class="fas fa-mobile-alt"></i> <span>Nomor HP +62 real pattern</span></div>
+                <div class="feature"><i class="fas fa-shield-alt"></i> <span>Unik per akun, anti duplikat</span></div>
+                <div class="feature"><i class="fab fa-tiktok"></i> <span>Support by Reza & Unchek</span></div>
+            </div>
+            <div style="font-size:0.7rem; margin-top: 20px;"><i class="fas fa-check-circle"></i> 1 data/detik • maks 500 data</div>
+        </div>
+        <div class="login-form-side">
+            <div style="text-align:center; margin-bottom: 24px;">
+                <i class="fas fa-fingerprint" style="font-size: 40px; color: var(--primary);"></i>
+                <h3 style="margin-top: 10px;">Akses Dashboard</h3>
+                <p style="font-size: 0.7rem; color: var(--text-muted);">Masuk dengan kredensial</p>
+            </div>
+            <div id="errAlert" class="alert-modern" style="background:#ffebee; color:#c62828; display:none;"><i class="fas fa-exclamation-triangle"></i> <span id="errText"></span></div>
+            <div class="input-group">
+                <label>Username</label>
+                <div class="input-icon-wrapper">
+                    <i class="fas fa-user"></i>
+                    <input type="text" id="loginUser" placeholder="••••••••">
+                </div>
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <div class="input-icon-wrapper">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="loginPass" placeholder="••••••••">
+                    <button class="eye-toggle" id="eyeBtn" type="button"><i class="far fa-eye" id="eyeIcon"></i></button>
+                </div>
+            </div>
+            <button class="login-btn" id="doLogin"><i class="fas fa-arrow-right-to-bracket"></i> Masuk Sekarang</button>
+            <div class="login-hint" style="margin-top: 24px; text-align: center; font-size:0.7rem;">
+                <p>Dev by <strong>Reza & Unchek</strong> · </p>
+                <small style="color:var(--text-muted);">Berbagi Itu Indah</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- DASHBOARD -->
+<div id="dashPage" style="display: none;">
+    <div class="dash-container">
+        <div class="control-card glass-panel">
+            <div class="input-row">
+                <div class="field-group">
+                    <label><i class="fas fa-chart-line"></i> JUMLAH DATA</label>
+                    <input type="number" id="jumlahData" value="15" min="1" max="500">
+                </div>
+                <div class="button-group">
+                    <button class="btn-action btn-primary" id="kirimBtn"><i class="fas fa-paper-plane"></i> Kirim</button>
+                    <button class="btn-action btn-warning" id="stopBtn"><i class="fas fa-stop"></i> Stop</button>
+                    <button class="btn-action btn-danger" id="clearBtn"><i class="fas fa-trash-alt"></i> Bersih</button>
+                </div>
+            </div>
+            <div class="status-indicator">
+                <div><span class="dot-status" id="statusDot" style="background: #a78bfa;"></span> <span id="statusText">Siap</span></div>
+                <div><i class="fas fa-list-ul"></i> <span id="counter">0 / 0</span></div>
+            </div>
+        </div>
+
+        <div class="glass-panel" style="overflow: hidden;">
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr><th>#</th><th>Nama Lengkap</th><th>Email</th><th>Nomor HP</th><th>Password</th><th>ID FF</th><th>Level</th><th>Login via</th></tr>
+                    </thead>
+                    <tbody id="tblBody"><tr><td colspan="8" class="empty-row"><i class="fas fa-inbox" style="font-size: 32px; opacity: 0.4;"></i><p>Belum ada data • Tekan Kirim</p></td></tr></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="footer-social glass-panel">
+            <div class="social-links">
+                <a href="https://www.tiktok.com/@rejaxjebehh" target="_blank" class="social-card"><i class="fab fa-tiktok"></i> TikTok @rejaxjebehh</a>
+                <a href="https://www.youtube.com/@RezaMaulanaa-b6m" target="_blank" class="social-card"><i class="fab fa-youtube"></i> YouTube @RezaMaulanaa-b6m</a>
+            </div>
+            <div style="font-size: 0.65rem; opacity: 0.7;">© 2026 Reza & Unchek · </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ======================= CREDENTIALS BARU ==================
+    const USERS = {
+        "Rezaa": "unchek",
+        "Reza": "unchek123",
+        "Unchek": "reza2026"
+    };
+
+    // SESSION RESTORE
+    let copyCount = 0;
+    const blockUntilStorage = localStorage.getItem('blockUntil');
+    if (blockUntilStorage && Date.now() < parseInt(blockUntilStorage)) {
+        document.body.innerHTML = `<div style="min-height:100vh; display:flex; align-items:center; justify-content:center; background:#0a0a0a; color:red;"><div><i class="fas fa-ban"></i> <h3>Diblokir Sementara</h3><p>Karena aktivitas menyalin, akses ditangguhkan 2 jam.</p></div></div>`;
+        throw new Error("Blocked");
+    }
+
+    function antiCopy(e) {
+        e.preventDefault();
+        copyCount++;
+        if (copyCount >= 3) {
+            localStorage.setItem('blockUntil', Date.now() + 7200000);
+            alert("Akses diblokir 2 jam karena menyalin konten!");
+            location.reload();
+        } else {
+            alert(`Dilarang menyalin! (Peringatan ${copyCount}/3)`);
+        }
+        return false;
+    }
+    document.addEventListener('copy', antiCopy);
+    document.addEventListener('cut', antiCopy);
+    document.addEventListener('contextmenu', antiCopy);
+    document.addEventListener('keydown', (e) => { if ((e.ctrlKey && ['c','C','u','U','a','A','s','S'].includes(e.key)) || e.key === 'F12') antiCopy(e); });
+
+    // ============= LOGIC ============
+    let loginAttempts = 0, lockTimer = null;
+    function showErr(msg) {
+        const alertDiv = document.getElementById('errAlert');
+        document.getElementById('errText').innerText = msg;
+        alertDiv.style.display = 'flex';
+        setTimeout(() => alertDiv.style.display = 'none', 3000);
+    }
+
+    const eyeBtn = document.getElementById('eyeBtn');
+    const passInput = document.getElementById('loginPass');
+    if(eyeBtn) eyeBtn.addEventListener('click', () => {
+        const type = passInput.type === 'password' ? 'text' : 'password';
+        passInput.type = type;
+        document.getElementById('eyeIcon').className = type === 'password' ? 'far fa-eye' : 'far fa-eye-slash';
+    });
+
+    document.getElementById('doLogin').addEventListener('click', () => {
+        const user = document.getElementById('loginUser').value.trim();
+        const pass = document.getElementById('loginPass').value;
+        if (USERS[user] === pass) {
+            loginAttempts = 0;
+            let seed = 0;
+            for(let i=0;i<user.length;i++) seed += user.charCodeAt(i) * (i+31);
+            sessionStorage.setItem('loggedUser', user);
+            sessionStorage.setItem('userSeed', seed);
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('dashPage').style.display = 'block';
+            initDashboard(user, seed);
+        } else {
+            loginAttempts++;
+            showErr(`Gagal! Percobaan ${loginAttempts}/5`);
+            if(loginAttempts >= 5) {
+                document.getElementById('doLogin').disabled = true;
+                setTimeout(() => { document.getElementById('doLogin').disabled = false; loginAttempts = 0; }, 30000);
+                showErr("Terlalu banyak gagal, coba 30 detik lagi.");
+            }
+        }
+    });
+
+    // ============ DATA GENERATOR =============
+    const NAMES_M = ["Reza","Andika","Bima","Cakra","Dimas","Erik","Farhan","Galang","Haris","Iqbal","Jaka","Krisna","Lutfi","Maulana","Nanda","Oscar","Prasetyo","Qori","Rangga","Satria","Taufik","Umar","Vega","Wahyu","Xavier","Yuda","Zidan","Aldi","Bagas","Chandra","Dwiki","Edo","Fikri","Gilang","Hilman","Ilham","Jefri","Kurnia","Leo","Miftah","Niko","Oka","Putra","Rizki","Surya","Teguh","Ucok","Vino","Wawan","Yogi","Zaki"];
+    const NAMES_F = ["Aisyah","Bunga","Citra","Dewi","Elsa","Fitri","Gina","Hana","Intan","Jasmine","Karina","Laras","Mutiara","Nadia","Olivia","Putri","Qiana","Rani","Sinta","Tiara","Uli","Vania","Wulan","Xena","Yulia","Zahra","Amelia","Bella","Cantika","Dinda","Eka","Feny","Gita","Hilda","Ika","Julia","Kiki","Laila","Mega","Nina","Ochi","Prita","Rina","Sari","Tia","Umi","Vera","Winda","Yuni","Zaskia"];
+    const LAST_NAMES = ["Pratama","Wijaya","Kurniawan","Hidayat","Santoso","Nugroho","Mahendra","Ramadhan","Firmansyah","Gunawan","Saputra","Setiawan","Wibowo","Kusuma","Purnama","Utami","Lestari","Handayani","Pratiwi","Anggraini"];
+    const DOMAINS = ["gmail.com","outlook.com","yahoo.com"];
+    const HP_PREFIX = ["0812","0813","0821","0852","0856","0878","0882","0896","0895"];
+    const PW_BASE = ["reza123","unchek","jakarta","generator","premium","indonesia","berkah","sukses","mantap","juara"];
+    const LOGIN_METHOD = ["Google","Facebook","Email"];
+
+    function prng(seedVal) {
+        let s = Math.abs(seedVal) % 2147483647 || 1;
+        return () => { s = (s * 16807) % 2147483647; return (s - 1) / 2147483646; };
+    }
+
+    function generateRow(idx, baseSeed) {
+        const rng = prng(baseSeed * 7919 + idx * 6241);
+        const isFemale = rng() < 0.48;
+        const firstName = isFemale ? NAMES_F[Math.floor(rng() * NAMES_F.length)] : NAMES_M[Math.floor(rng() * NAMES_M.length)];
+        const hasLast = rng() < 0.7;
+        const lastName = hasLast ? LAST_NAMES[Math.floor(rng() * LAST_NAMES.length)] : "";
+        const fullName = hasLast ? `${firstName} ${lastName}` : firstName;
+        const email = `${firstName.toLowerCase()}.${lastName?lastName.toLowerCase():'user'}${Math.floor(rng() * 999)}@${DOMAINS[Math.floor(rng() * DOMAINS.length)]}`;
+        let phone = "+62 " + HP_PREFIX[Math.floor(rng() * HP_PREFIX.length)];
+        for(let i=0;i<8;i++) phone += Math.floor(rng() * 10);
+        phone = phone.slice(0,13) + "-" + phone.slice(13);
+        const pass = PW_BASE[Math.floor(rng() * PW_BASE.length)] + Math.floor(rng() * 999);
+        let ffId = "";
+        for(let i=0;i<9;i++) ffId += Math.floor(rng() * 10);
+        const level = 15 + Math.floor(rng() * 85);
+        const login = LOGIN_METHOD[Math.floor(rng() * LOGIN_METHOD.length)];
+        return { nama: fullName, email, nomor: phone, pass, ffId, level, login };
+    }
+
+    let currentInterval = null, currentCount = 0, targetCount = 0, offset = 0, userSeedGlobal = 0;
+
+    function emptyTableRow() {
+        return `<tr><td colspan="8" class="empty-row"><i class="fas fa-database"></i> <p>Klik Kirim untuk menghasilkan data unik</p></td></tr>`;
+    }
+
+    function addRowToTable(data, index) {
+        const tbody = document.getElementById('tblBody');
+        if(tbody.children.length === 1 && tbody.children[0].innerHTML.includes("Belum ada data")) tbody.innerHTML = "";
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${index}</td>
+            <td><span class="badge-modern"><i class="fas fa-user"></i> ${data.nama}</span></td>
+            <td><span class="badge-modern"><i class="fas fa-envelope"></i> ${data.email}</span></td>
+            <td><span class="badge-modern"><i class="fas fa-phone"></i> ${data.nomor}</span></td>
+            <td><span class="badge-modern"><i class="fas fa-key"></i> ${data.pass}</span></td>
+            <td><span class="badge-modern">🎮 ${data.ffId}</span></td>
+            <td><span class="badge-modern" style="background:${data.level>70?'#fbbf2433':'#c084fc33'}">⭐ Lv.${data.level}</span></td>
+            <td><span class="badge-modern"><i class="fab fa-${data.login === 'Google' ? 'google' : (data.login === 'Facebook' ? 'facebook' : 'envelope')}"></i> ${data.login}</span></td>
+        `;
+        tbody.appendChild(tr);
+        document.querySelector('.table-wrapper')?.scrollTo({ top: document.querySelector('.table-wrapper').scrollHeight, behavior: 'smooth' });
+    }
+
+    function updateStatus(type, msg) {
+        const dot = document.getElementById('statusDot');
+        const textSpan = document.getElementById('statusText');
+        textSpan.innerText = msg;
+        if(type === 'run') dot.style.background = '#10b981';
+        else if(type === 'stop') dot.style.background = '#f97316';
+        else if(type === 'done') dot.style.background = '#c084fc';
+        else dot.style.background = '#94a3b8';
+    }
+
+    function stopGeneration() {
+        if(currentInterval) clearInterval(currentInterval);
+        currentInterval = null;
+    }
+
+    function initDashboard(user, seed) {
+        userSeedGlobal = seed;
+        currentCount = 0;
+        targetCount = 0;
+        offset = 0;
+        document.getElementById('tblBody').innerHTML = emptyTableRow();
+        document.getElementById('counter').innerText = '0 / 0';
+        updateStatus('idle', 'Siap menghasilkan data');
+    }
+
+    document.getElementById('kirimBtn').addEventListener('click', () => {
+        let val = parseInt(document.getElementById('jumlahData').value);
+        if(isNaN(val) || val < 1) val = 1;
+        if(val > 500) val = 500;
+        stopGeneration();
+        const existingRows = document.getElementById('tblBody').rows.length;
+        const hasEmpty = document.getElementById('tblBody').innerHTML.includes("Belum ada data");
+        currentCount = hasEmpty ? 0 : existingRows;
+        targetCount = val;
+        offset = currentCount;
+        if(currentCount >= targetCount) return;
+        updateStatus('run', 'Memproses data...');
+        document.getElementById('counter').innerText = `${currentCount} / ${targetCount}`;
+        currentInterval = setInterval(() => {
+            if(currentCount >= targetCount) {
+                stopGeneration();
+                updateStatus('done', 'Selesai!');
+                return;
+            }
+            const newData = generateRow(offset, userSeedGlobal);
+            addRowToTable(newData, currentCount+1);
+            currentCount++;
+            offset++;
+            document.getElementById('counter').innerText = `${currentCount} / ${targetCount}`;
+        }, 1000);
+    });
+
+    document.getElementById('stopBtn').addEventListener('click', () => {
+        stopGeneration();
+        updateStatus('stop', 'Dihentikan manual');
+    });
+    document.getElementById('clearBtn').addEventListener('click', () => {
+        stopGeneration();
+        document.getElementById('tblBody').innerHTML = emptyTableRow();
+        currentCount = 0;
+        targetCount = 0;
+        offset = 0;
+        document.getElementById('counter').innerText = '0 / 0';
+        updateStatus('idle', 'Tabel bersih');
+    });
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        sessionStorage.clear();
+        location.reload();
+    });
+
+    // THEME + COLOR dynamic
+    const themes = [
+        ['#c084fc','#a855f7','#fbbf24','#22d3ee'],
+        ['#3b82f6','#06b6d4','#facc15','#f97316'],
+        ['#ec4899','#f43f5e','#fbbf24','#a855f7'],
+        ['#10b981','#059669','#fbbf24','#3b82f6']
+    ];
+    let colorIndex = parseInt(localStorage.getItem('colorIdx') || '0');
+    function applyColor(palette) {
+        document.documentElement.style.setProperty('--primary', palette[0]);
+        document.documentElement.style.setProperty('--primary-dark', palette[1]);
+        document.documentElement.style.setProperty('--secondary', palette[2]);
+        document.documentElement.style.setProperty('--accent', palette[3]);
+    }
+    applyColor(themes[colorIndex]);
+    document.getElementById('colorBtn').addEventListener('click', () => {
+        colorIndex = (colorIndex+1) % themes.length;
+        applyColor(themes[colorIndex]);
+        localStorage.setItem('colorIdx', colorIndex);
+    });
+
+    const themeBtn = document.getElementById('themeBtn');
+    const themeIcon = document.getElementById('themeIcon');
+    function setTheme(theme) {
+        if(theme === 'light') {
+            document.body.classList.add('light');
+            themeIcon.className = 'fas fa-sun';
+        } else {
+            document.body.classList.remove('light');
+            themeIcon.className = 'fas fa-moon';
+        }
+        localStorage.setItem('theme', theme);
+    }
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    setTheme(savedTheme);
+    themeBtn.addEventListener('click', () => {
+        const newTheme = document.body.classList.contains('light') ? 'dark' : 'light';
+        setTheme(newTheme);
+    });
+
+    // restore session
+    const savedUser = sessionStorage.getItem('loggedUser');
+    const savedSeed = parseInt(sessionStorage.getItem('userSeed') || '0');
+    if(savedUser && USERS[savedUser]) {
+        document.getElementById('loginPage').style.display = 'none';
+        document.getElementById('dashPage').style.display = 'block';
+        initDashboard(savedUser, savedSeed);
+    }
+</script>
+</body>
+</html>
